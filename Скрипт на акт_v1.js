@@ -27,14 +27,7 @@ function setAttrValue(attributeCode, attributeValue) {
 
 //Скрипт 1. Автоматичне визначення email ініціатора рахунку та підрозділу
 function onCreate() {
-  EdocsApi.setAttributeValue({
-    code: "Branch",
-    value: EdocsApi.getOrgUnitDataByUnitID(
-      EdocsApi.getEmployeeDataByEmployeeID(CurrentDocument.initiatorId).unitId,
-      1
-    ).unitId,
-    text: null,
-  });
+  EdocsApi.setAttributeValue({ code: "Branch", value: EdocsApi.getOrgUnitDataByUnitID(EdocsApi.getEmployeeDataByEmployeeID(CurrentDocument.initiatorId).unitId, 1).unitId, text: null });
 }
 
 function onSearchBranch(searchRequest) {
@@ -47,95 +40,45 @@ function onSearchBranch(searchRequest) {
 function onCardInitialize() {
   DefinitionAgreeableTask();
   EnterResultsTask();
+  AddDatAndNumberTask();
   //RegisterActTask();
 }
 //Скрипт 2. Зміна властивостей атрибутів та автоматичне визначення email ініціатора
 function DefinitionAgreeableTask() {
-  debugger;
   var stateTask = EdocsApi.getCaseTaskDataByCode("DefinitionAgreeable")?.state;
+  if (stateTask == "assigned" || stateTask == "inProgress" || stateTask == "delegated") {
+    EdocsApi.setControlProperties({ code: "SubjectAct", hidden: false, disabled: false, required: true });
+    EdocsApi.setControlProperties({ code: "VisaHolder", hidden: false, disabled: false, required: true });
+    EdocsApi.setControlProperties({ code: "OrgRPEmail", hidden: false, disabled: false, required: true });
+    EdocsApi.setControlProperties({ code: "StructureDepart", hidden: false, disabled: false, required: true });
+    EdocsApi.setControlProperties({ code: "ContractorRPEmail", hidden: false, disabled: false, required: true });
+    EdocsApi.setControlProperties({ code: "DocKind", hidden: false, disabled: false, required: true });
 
-  if (
-    stateTask == "assigned" ||
-    stateTask == "inProgress" ||
-    stateTask == "delegated"
-  ) {
-    setPropertyRequired("SubjectAct");
-    setPropertyRequired("VisaHolder");
-    setPropertyRequired("OrgRPEmail");
-    setPropertyRequired("StructureDepart");
-    setPropertyRequired("ContractorRPEmail");
-    setPropertyRequired("DocKind");
-    setPropertyHidden("SubjectAct", false);
-    setPropertyHidden("VisaHolder", false);
-    setPropertyHidden("OrgRPEmail", false);
-    setPropertyHidden("StructureDepart", false);
-    setPropertyHidden("ContractorRPEmail", false);
-    setPropertyHidden("DocKind", false);
-    setPropertyDisabled("SubjectAct", false);
-    setPropertyDisabled("VisaHolder", false);
-    setPropertyDisabled("OrgRPEmail", false);
-    setPropertyDisabled("StructureDepart", false);
-    setPropertyDisabled("DocKind", false);
-    setPropertyDisabled("ContractorRPEmail", false);
-
-    EdocsApi.setAttributeValue({
-      code: "OrgRPEmail",
-      value: EdocsApi.getEmployeeDataByEmployeeID(CurrentDocument.initiatorId)
-        .email,
-      text: null,
-    });
+    EdocsApi.setAttributeValue({ code: "OrgRPEmail", value: EdocsApi.getEmployeeDataByEmployeeID(CurrentDocument.initiatorId).email, text: null });
   } else if (stateTask == "completed") {
-    setPropertyRequired("SubjectAct");
-    setPropertyRequired("VisaHolder");
-    setPropertyRequired("DocKind");
-    setPropertyRequired("OrgRPEmail");
-    setPropertyRequired("StructureDepart");
-    setPropertyRequired("ContractorRPEmail");
-    setPropertyHidden("SubjectAct", false);
-    setPropertyHidden("VisaHolder", false);
-      setPropertyHidden("DocKind", false);
-    setPropertyHidden("OrgRPEmail", false);
-    setPropertyHidden("StructureDepart", false);
-    setPropertyHidden("ContractorRPEmail", false);
-    setPropertyDisabled("SubjectAct");
-    setPropertyDisabled("VisaHolder");
-    setPropertyDisabled("OrgRPEmail");
-    setPropertyDisabled("DocKind");
-    setPropertyDisabled("StructureDepart");
-    setPropertyDisabled("ContractorRPEmail");
+    EdocsApi.setControlProperties({ code: "SubjectAct", hidden: false, disabled: true, required: true });
+    EdocsApi.setControlProperties({ code: "VisaHolder", hidden: false, disabled: true, required: true });
+    EdocsApi.setControlProperties({ code: "OrgRPEmail", hidden: false, disabled: true, required: true });
+    EdocsApi.setControlProperties({ code: "StructureDepart", hidden: false, disabled: true, required: true });
+    EdocsApi.setControlProperties({ code: "ContractorRPEmail", hidden: false, disabled: true, required: true });
+    EdocsApi.setControlProperties({ code: "DocKind", hidden: false, disabled: true, required: true });
   } else {
-    setPropertyRequired("SubjectAct", false);
-    setPropertyRequired("VisaHolder", false);
-    setPropertyRequired("OrgRPEmail", false);
-    setPropertyRequired("StructureDepart", false);
-    setPropertyRequired("ContractorRPEmail", false);
-    setPropertyRequired("DocKind", false);
-    setPropertyHidden("SubjectAct");
-    setPropertyHidden("VisaHolder");
-    setPropertyHidden("OrgRPEmail");
-    setPropertyHidden("StructureDepart");
-    setPropertyHidden("ContractorRPEmail");
-    setPropertyHidden("DocKind");
-    setPropertyDisabled("SubjectAct", false);
-    setPropertyDisabled("VisaHolder", false);
-    setPropertyDisabled("OrgRPEmail", false);
-    setPropertyDisabled("StructureDepart", false);
-    setPropertyDisabled("DocKind", false);
-    setPropertyDisabled("ContractorRPEmail", false);
+    EdocsApi.setControlProperties({ code: "SubjectAct", hidden: true, disabled: false, required: false });
+    EdocsApi.setControlProperties({ code: "VisaHolder", hidden: true, disabled: false, required: false });
+    EdocsApi.setControlProperties({ code: "OrgRPEmail", hidden: true, disabled: false, required: false });
+    EdocsApi.setControlProperties({ code: "StructureDepart", hidden: true, disabled: false, required: false });
+    EdocsApi.setControlProperties({ code: "ContractorRPEmail", hidden: true, disabled: false, required: false });
+    EdocsApi.setControlProperties({ code: "DocKind", hidden: true, disabled: false, required: false });
   }
 }
 
 function onTaskExecuteDefinitionAgreeable(routeStage) {
   debugger;
   if (routeStage.executionResult == "executed") {
-    if (!EdocsApi.getAttributeValue("SubjectAct").value)
-      throw `Внесіть значення в поле "Предмет акту"`;
-    if (!EdocsApi.getAttributeValue("VisaHolder").value)
-      throw `Внесіть значення в поле "погоджуючі"`;
-    if (!EdocsApi.getAttributeValue("OrgRPEmail").value)
-      throw `Внесіть значення в поле "email контактної особи Організації"`;
-    if (!EdocsApi.getAttributeValue("ContractorRPEmail").value)
-      throw `Внесіть значення в поле "email контактної особи Замовника"`;
+    if (!EdocsApi.getAttributeValue("SubjectAct").value) throw `Внесіть значення в поле "Предмет акту"`;
+    if (!EdocsApi.getAttributeValue("VisaHolder").value) throw `Внесіть значення в поле "погоджуючі"`;
+    if (!EdocsApi.getAttributeValue("OrgRPEmail").value) throw `Внесіть значення в поле "email контактної особи Організації"`;
+    if (!EdocsApi.getAttributeValue("ContractorRPEmail").value) throw `Внесіть значення в поле "email контактної особи Замовника"`;
   }
 }
 
@@ -152,51 +95,65 @@ function EnterResultsTask() {
   debugger;
   var stateTask = EdocsApi.getCaseTaskDataByCode("EnterResults")?.state;
 
-  if (
-    stateTask == "assigned" ||
-    stateTask == "inProgress" ||
-    stateTask == "delegated"
-  ) {
-    setPropertyRequired("ActMeetingResult");
-    setPropertyRequired("Number");
-    setPropertyRequired("DateProtocol");
-    setPropertyHidden("ActMeetingResult", false);
-    setPropertyHidden("Number", false);
-    setPropertyHidden("DateProtocol", false);
-    setPropertyDisabled("ActMeetingResult", false);
-    setPropertyDisabled("Number", false);
-    setPropertyDisabled("DateProtocol", false);
+  if (stateTask == "assigned" || stateTask == "inProgress" || stateTask == "delegated") {
+    EdocsApi.setControlProperties({ code: "ActMeetingResult", hidden: false, disabled: false, required: true });
+    EdocsApi.setControlProperties({ code: "Number", hidden: false, disabled: false, required: true });
+    EdocsApi.setControlProperties({ code: "DateProtocol", hidden: false, disabled: false, required: true });
   } else if (stateTask == "completed") {
-    setPropertyRequired("ActMeetingResult");
-    setPropertyRequired("Number");
-    setPropertyRequired("DateProtocol");
-    setPropertyHidden("ActMeetingResult", false);
-    setPropertyHidden("Number", false);
-    setPropertyHidden("DateProtocol", false);
-    setPropertyDisabled("ActMeetingResult");
-    setPropertyDisabled("Number");
-    setPropertyDisabled("DateProtocol");
+    EdocsApi.setControlProperties({ code: "ActMeetingResult", hidden: false, disabled: true, required: true });
+    EdocsApi.setControlProperties({ code: "Number", hidden: false, disabled: true, required: true });
+    EdocsApi.setControlProperties({ code: "DateProtocol", hidden: false, disabled: true, required: true });
   } else {
-    setPropertyRequired("ActMeetingResult", false);
-    setPropertyRequired("Number", false);
-    setPropertyRequired("DateProtocol", false);
-    setPropertyHidden("ActMeetingResult");
-    setPropertyHidden("Number");
-    setPropertyHidden("DateProtocol");
-    setPropertyDisabled("ActMeetingResult", false);
-    setPropertyDisabled("Number", false);
-    setPropertyDisabled("DateProtocol", false);
+    EdocsApi.setControlProperties({ code: "ActMeetingResult", hidden: true, disabled: false, required: false });
+    EdocsApi.setControlProperties({ code: "Number", hidden: true, disabled: false, required: false });
+    EdocsApi.setControlProperties({ code: "DateProtocol", hidden: true, disabled: false, required: false });
+  }
+}
+
+function ProcessActTask() {
+  debugger;
+  var stateTask = EdocsApi.getCaseTaskDataByCode("EnterResults")?.state;
+
+  if (stateTask == "assigned" || stateTask == "inProgress" || stateTask == "delegated") {
+    EdocsApi.setControlProperties({ code: "ActMeetingResult", hidden: false, disabled: false, required: true });
+    EdocsApi.setControlProperties({ code: "Number", hidden: false, disabled: false, required: true });
+    EdocsApi.setControlProperties({ code: "DateProtocol", hidden: false, disabled: false, required: true });
+  } else if (stateTask == "completed") {
+    EdocsApi.setControlProperties({ code: "ActMeetingResult", hidden: false, disabled: true, required: true });
+    EdocsApi.setControlProperties({ code: "Number", hidden: false, disabled: true, required: true });
+    EdocsApi.setControlProperties({ code: "DateProtocol", hidden: false, disabled: true, required: true });
+  } else {
+    EdocsApi.setControlProperties({ code: "ActMeetingResult", hidden: true, disabled: false, required: false });
+    EdocsApi.setControlProperties({ code: "Number", hidden: true, disabled: false, required: false });
+    EdocsApi.setControlProperties({ code: "DateProtocol", hidden: true, disabled: false, required: false });
+  }
+}
+function onTaskExecutedProtocolAdd() {
+  AddDatAndNumberTask("assigned");
+}
+
+function AddDatAndNumberTask(stateTask) {
+  debugger;
+  if (!stateTask) {
+    stateTask = EdocsApi.getCaseTaskDataByCode("AddDatAndNumber")?.state;
+  }
+
+  if (stateTask == "assigned" || stateTask == "inProgress" || stateTask == "delegated") {
+    EdocsApi.setControlProperties({ code: "NumberProtocol", hidden: false, disabled: false, required: true });
+    EdocsApi.setControlProperties({ code: "Date", hidden: false, disabled: false, required: true });
+  } else if (stateTask == "completed") {
+    EdocsApi.setControlProperties({ code: "NumberProtocol", hidden: false, disabled: true, required: true });
+    EdocsApi.setControlProperties({ code: "Date", hidden: false, disabled: true, required: true });
+  } else {
+    EdocsApi.setControlProperties({ code: "NumberProtocol", hidden: true, disabled: false, required: false });
+    EdocsApi.setControlProperties({ code: "Date", hidden: true, disabled: false, required: false });
   }
 }
 
 function onChangeActMeetingResult() {
   if (EdocsApi.getAttributeValue("ActMeetingResult").value == "Погоджено") {
     var stateTask = EdocsApi.getCaseTaskDataByCode("EnterResults")?.state;
-    if (
-      stateTask == "assigned" ||
-      stateTask == "inProgress" ||
-      stateTask == "delegated"
-    ) {
+    if (stateTask == "assigned" || stateTask == "inProgress" || stateTask == "delegated") {
       EdocsApi.message(
         `Замовнику на підпис будуть відправлені тільки зафіксовані файли. Перевірте наявність позначки «Фіксується» тільки у тих файлах, які необхідно відправити Замовнику. 
 Для інших файлів дана позначка має бути відсутня.`
@@ -208,14 +165,10 @@ function onChangeActMeetingResult() {
 function onTaskExecuteEnterResults(routeStage) {
   debugger;
   if (routeStage.executionResult == "executed") {
-    if (!EdocsApi.getAttributeValue("ActMeetingResult").value)
-      throw `Внесіть значення в поле "Результат розгляду акту засіданням"`;
-    if (!EdocsApi.getAttributeValue("Number").value)
-      throw `Внесіть значення в поле "Номер"`;
+    if (!EdocsApi.getAttributeValue("ActMeetingResult").value) throw `Внесіть значення в поле "Результат розгляду акту засіданням"`;
+    if (!EdocsApi.getAttributeValue("Number").value) throw `Внесіть значення в поле "Номер"`;
   }
 }
-
-
 
 //Скрипт 5. Визначення ролі за розрізом
 function setSections() {
@@ -254,12 +207,7 @@ function setDataForESIGN() {
   } else {
     name += caseType;
   }
-  name +=
-    " №" +
-    (registrationNumber ? registrationNumber : CurrentDocument.id) +
-    (!registrationDate
-      ? ""
-      : " від " + moment(registrationDate).format("DD.MM.YYYY"));
+  name += " №" + (registrationNumber ? registrationNumber : CurrentDocument.id) + (!registrationDate ? "" : " від " + moment(registrationDate).format("DD.MM.YYYY"));
   doc = {
     DocName: name,
     extSysDocId: CurrentDocument.id,
@@ -280,8 +228,7 @@ function setDataForESIGN() {
         taskType: "ToSign",
         taskState: "NotAssigned",
         legalEntityCode: EdocsApi.getAttributeValue("ContractorCode").value,
-        contactPersonEmail:
-          EdocsApi.getAttributeValue("ContractorRPEmail").value,
+        contactPersonEmail: EdocsApi.getAttributeValue("ContractorRPEmail").value,
         expectedSignatures: [],
       },
     ],
@@ -352,22 +299,48 @@ function onTaskCommentedSendOutDoc(caseTaskComment) {
   };
 }
 
+function ProcessActTask() {
+  debugger;
+  var stateTask = EdocsApi.getCaseTaskDataByCode("ProcessAct")?.state;
+
+  if ((stateTask == "assigned" || stateTask == "inProgress" || stateTask == "delegated") && !EdocsApi.getAttributeValue("VisaHolders").value) {
+    var StructureDepart = EdocsApi.getAttributeValue("StructureDepart").value;
+    if (StructureDepart) {
+      var data = EdocsApi.findElementByProperty("id", StructureDepart, EdocsApi.getDictionaryData("Commission")).code; //беремо значення із довідника "StructureDepart" та шукаємо значення в довіднику "Commission"
+      var VisaHolders = getEmployees("VisaHolders", data);
+      EdocsApi.setAttributeValue(VisaHolders);
+    }
+  }
+}
+
+function onTaskExecuteProcessAct(routeStage) {
+  debugger;
+  if (routeStage.executionResult == "executed") {
+    if (!EdocsApi.getAttributeValue("VisaHolders").value) throw `Внесіть значення в поле «Погоджуючі»`;
+  }
+}
+
 function onChangeStructureDepart() {
   debugger;
   var StructureDepart = EdocsApi.getAttributeValue("StructureDepart").value;
   if (StructureDepart) {
-    var data = EdocsApi.findElementByProperty(
-      "id",
-      StructureDepart,
-      EdocsApi.getDictionaryData("Commission")
-    ).code; //беремо значення із довідника "StructureDepart" та шукаємо значення в довіднику "Commission"
-    setEmployees(data);
+    var data = EdocsApi.findElementByProperty("id", StructureDepart, EdocsApi.getDictionaryData("Commission")).code; //беремо значення із довідника "StructureDepart" та шукаємо значення в довіднику "Commission"
+    setVisaHolder(data);
   }
 }
-function setEmployees(data) {
+
+function setVisaHolder(data) {
   debugger;
   if (data) {
-    const array = data.split(", ");
+    var VisaHolder = getEmployees("VisaHolder", data);
+    EdocsApi.setAttributeValue(VisaHolder);
+  }
+}
+
+function getEmployees(codeAttr, data) {
+  debugger;
+  if (codeAttr && data) {
+    var array = data.split(", ");
     var employeeText = null;
     var employee = [];
     for (let index = 0; index < array.length; index++) {
@@ -381,23 +354,11 @@ function setEmployees(data) {
           positionName: employeeById.positionName,
         });
 
-        employeeText
-          ? (employeeText =
-              employeeText +
-              "\n" +
-              employeeById.positionName +
-              "\t" +
-              employeeById.shortName)
-          : (employeeText =
-              employeeById.positionName + "\t" + employeeById.shortName);
+        employeeText ? (employeeText = employeeText + "\n" + employeeById.positionName + "\t" + employeeById.shortName) : (employeeText = employeeById.positionName + "\t" + employeeById.shortName);
         employeesValue = `[{"id":0,"employeeId":"${employeeById.employeeId}","index":0,"employeeName":"${employeeById.shortName}","positionName":"${employeeById.positionName}"}]`;
       }
     }
-    EdocsApi.setAttributeValue({
-      code: "VisaHolder",
-      value: JSON.stringify(employee),
-      text: employeeText,
-    });
+    return { code: codeAttr, value: JSON.stringify(employee), text: employeeText };
   }
 }
 
@@ -405,22 +366,10 @@ function onChangeHeadCommission() {
   var HeadCommission = EdocsApi.getAttributeValue("HeadCommission").value;
   if (HeadCommission) {
     var employee = EdocsApi.getEmployeeDataByEmployeeID(Number(HeadCommission));
-    EdocsApi.setAttributeValue({
-      code: "Position",
-      value: employee.positionName,
-    });
-    EdocsApi.setAttributeValue({
-      code: "TelephoneCus",
-      value: employee.phone,
-    });
+    EdocsApi.setAttributeValue({ code: "Position", value: employee.positionName });
+    EdocsApi.setAttributeValue({ code: "TelephoneCus", value: employee.phone });
   } else {
-    EdocsApi.setAttributeValue({
-      code: "Position",
-      value: "",
-    });
-    EdocsApi.setAttributeValue({
-      code: "TelephoneCus",
-      value: "",
-    });
+    EdocsApi.setAttributeValue({ code: "Position", value: "" });
+    EdocsApi.setAttributeValue({ code: "TelephoneCus", value: "" });
   }
 }
